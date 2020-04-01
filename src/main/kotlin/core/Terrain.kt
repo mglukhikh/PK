@@ -2,13 +2,13 @@ package core
 
 enum class Terrain {
     CENTER,
-    GRASS,
     PLAIN,
     FOREST,
     WATER,
-    DIRT,
-    CAVE;
+    GRASS,
+    SWAMP,
+    MINE;
 
-    fun canAddTo(other: Terrain): Boolean =
+    fun sameWith(other: Terrain?): Boolean =
         this == other || other == CENTER
 }

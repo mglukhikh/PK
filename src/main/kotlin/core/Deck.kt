@@ -1,8 +1,10 @@
 package core
 
+import kotlin.random.Random
+
 fun Pair(i: Int) = Pair(i, i)
 
-private val deck = listOf(
+private val rawDeck = listOf(
     Pair(10),
     Pair(10),
     Pair(20),
@@ -57,5 +59,17 @@ private val deck = listOf(
     Pair(62, 10),
     Pair(62, 50),
     Pair(62, 50),
-    Pair(63, 10),        
+    Pair(63, 10)
 )
+
+class Deck {
+    private var deck = rawDeck.mapIndexed { index, (first, second) ->
+        Patch(index + 1, first, second)
+    }.shuffled(Random)
+
+    fun take(num: Int): List<Patch> {
+        val result = deck.takeLast(num).sortedBy { it.number }
+        deck = deck.dropLast(num)
+        return result
+    }
+}
