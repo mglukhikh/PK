@@ -62,6 +62,9 @@ private val rawDeck = listOf(
     Pair(63, 10)
 )
 
+internal fun Int.toDeckPatch(direction: Direction): DirectedPatch =
+    DirectedPatch(Patch(this + 1, rawDeck[this].first, rawDeck[this].second), direction)
+
 class Deck {
     private var deck = rawDeck.mapIndexed { index, (first, second) ->
         Patch(index + 1, first, second)
