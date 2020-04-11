@@ -19,6 +19,10 @@ class MainApp : App(MainView::class) {
         val result = dialog.showAndWait()
         if (result.isPresent && result.get().buttonData == ButtonBar.ButtonData.OK_DONE) {
             val choices = PlayerColor.values().map { dialog.getPlayerChoice(it) }
+            if (PlayerChoice.AI in choices) {
+                alert(Alert.AlertType.ERROR, "Компьютерные игроки пока не поддерживаются!")
+                return
+            }
             val playerCount = choices.count { it != PlayerChoice.NONE }
             when {
                 playerCount < 2 -> {

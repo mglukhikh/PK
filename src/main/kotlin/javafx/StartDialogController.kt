@@ -25,8 +25,8 @@ class StartDialogController {
             box.selectionModel.select(
                 when(box) {
                     yellow -> 1
-                    red -> 2
-                    green -> 2
+                    red -> 1
+                    green -> 1
                     else -> 0
                 }
             )
