@@ -19,20 +19,27 @@ class MainApp : App(MainView::class) {
         val result = dialog.showAndWait()
         if (result.isPresent && result.get().buttonData == ButtonBar.ButtonData.OK_DONE) {
             val choices = PlayerColor.values().map { dialog.getPlayerChoice(it) }
-            if (choices.count { it != PlayerChoice.NONE } < 2) {
-                alert(Alert.AlertType.ERROR, "Выбрано слишком мало игроков!")
-            } else {
-                val indexedPlayerChoices = choices.withIndex().filter { (_, choice) ->
-                    choice != PlayerChoice.NONE
+            val playerCount = choices.count { it != PlayerChoice.NONE }
+            when {
+                playerCount < 2 -> {
+                    alert(Alert.AlertType.ERROR, "Выбрано слишком мало игроков!")
                 }
-                indexedPlayerChoices.associateTo(colorChoices) { (index, choice) ->
-                    PlayerColor.values()[index] to choice
+                playerCount == 2 -> {
+                    alert(Alert.AlertType.ERROR, "Игра с двумя игроками пока не поддерживается!")
                 }
-                val playersDescription = indexedPlayerChoices.joinToString { (index, choice) ->
-                    PlayerColor.values()[index].str + " " + choice.str
+                else -> {
+                    val indexedPlayerChoices = choices.withIndex().filter { (_, choice) ->
+                        choice != PlayerChoice.NONE
+                    }
+                    indexedPlayerChoices.associateTo(colorChoices) { (index, choice) ->
+                        PlayerColor.values()[index] to choice
+                    }
+                    val playersDescription = indexedPlayerChoices.joinToString { (index, choice) ->
+                        PlayerColor.values()[index].str + " " + choice.str
+                    }
+                    alert(Alert.AlertType.INFORMATION, "Играют", playersDescription)
+                    super.start(stage)
                 }
-                alert(Alert.AlertType.INFORMATION, "Играют", playersDescription)
-                super.start(stage)
             }
         } else {
             alert(Alert.AlertType.ERROR, "Игра не начата!")

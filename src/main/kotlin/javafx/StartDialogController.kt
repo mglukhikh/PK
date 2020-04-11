@@ -26,6 +26,7 @@ class StartDialogController {
                 when(box) {
                     yellow -> 1
                     red -> 2
+                    green -> 2
                     else -> 0
                 }
             )
