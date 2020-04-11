@@ -36,7 +36,7 @@ class MainView : View("Лоскутное королевство") {
 
     private val orientationPanes = mutableListOf<StackPane>()
 
-    private val currentDirection: Direction = Direction.TO_RIGHT
+    private var currentDirection: Direction = Direction.TO_RIGHT
 
     private lateinit var currentPatchToPlace: Patch
 
@@ -218,20 +218,32 @@ class MainView : View("Лоскутное королевство") {
                 stackpane {
                     orientationPanes += this
                     emptyRectangle()
+                    setOnMousePressed {
+                        changeOrientation(Direction.TO_UP)
+                    }
                 }
                 stackpane {
                     orientationPanes += this
                     emptyRectangle()
+                    setOnMousePressed {
+                        changeOrientation(Direction.TO_RIGHT)
+                    }
                 }
             }
             row {
                 stackpane {
                     orientationPanes += this
                     emptyRectangle()
+                    setOnMousePressed {
+                        changeOrientation(Direction.TO_LEFT)
+                    }
                 }
                 stackpane {
                     orientationPanes += this
                     emptyRectangle()
+                    setOnMousePressed {
+                        changeOrientation(Direction.TO_DOWN)
+                    }
                 }
             }
         }
@@ -314,6 +326,15 @@ class MainView : View("Лоскутное королевство") {
                 else -> pane.showSquare()
             }
         }
+    }
+
+    private fun changeOrientation(direction: Direction) {
+        val state = game.state
+        if (state !is GameState.PlaceCurrentPatch) {
+            return
+        }
+        currentDirection = direction
+        showOrientationPane()
     }
 
     private fun StackPane.showSquare(square: Square? = null) {
