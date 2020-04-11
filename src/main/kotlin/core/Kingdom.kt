@@ -2,8 +2,8 @@ package core
 
 import java.lang.AssertionError
 
-class Kingdom(val size: Int) {
-    val squares = mutableMapOf(Point(0, 0) to Square(Terrain.CENTER))
+class Kingdom(private val size: Int) {
+    private val squares = mutableMapOf(Point(0, 0) to Square(Terrain.CENTER))
 
     private val patches = mutableListOf<Pair<Point, DirectedPatch>>()
 
@@ -15,7 +15,7 @@ class Kingdom(val size: Int) {
 
     private val maxY: Int get() = squares.keys.maxBy { it.y }!!.y
 
-    val dimension: Int get() = maxOf(maxX - minX, maxY - minY) + 1
+    private val dimension: Int get() = maxOf(maxX - minX, maxY - minY) + 1
 
     private val overflown: Boolean get() = dimension > size
 
@@ -37,7 +37,7 @@ class Kingdom(val size: Int) {
     }
 
     fun addPatch(point: Point, patch: DirectedPatch): Boolean {
-        if (isPatchApplicable(point, patch)) return false
+        if (!isPatchApplicable(point, patch)) return false
         val secondPoint = point + patch.direction
 
         patches += (point to patch)
