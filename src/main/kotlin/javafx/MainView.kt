@@ -10,6 +10,7 @@ import game.GameState
 import javafx.geometry.Orientation
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
+import javafx.scene.shape.Circle
 import javafx.scene.shape.Rectangle
 import tornadofx.*
 
@@ -22,7 +23,7 @@ class MainView : View("Лоскутное королевство") {
 
     private val kingdomSize = if (playerNumber == 2) 7 else 5
 
-    private val game = Game(size = kingdomSize, players = colors, turns = 12).apply {
+    private val game = Game(size = kingdomSize, players = colors.shuffled(), turns = 12).apply {
         nextTurn(GameMove.None)
     }
 
@@ -33,6 +34,10 @@ class MainView : View("Лоскутное королевство") {
     private val currentChoicePanes = mutableListOf<ChoicePane>()
 
     private val nextChoicePanes = mutableListOf<ChoicePane>()
+
+    private lateinit var turnPane: StackPane
+
+    private val orientationPanes = mutableListOf<StackPane>()
 
     private fun kingdom(player: PlayerColor) = game.kingdom(player)
 
@@ -52,6 +57,12 @@ class MainView : View("Лоскутное королевство") {
             right {
                 vbox {
                     choicePanes()
+                }
+            }
+            // Зона статуса
+            bottom {
+                hbox {
+                    statusPanes()
                 }
             }
             showNextPatches()
@@ -188,6 +199,51 @@ class MainView : View("Лоскутное королевство") {
         return result
     }
 
+    private fun HBox.statusPanes() {
+        stackpane {
+            turnPane = this
+            emptyRectangle()
+            showKing(game.colorToMove!!)
+        }
+        thickSeparator()
+        gridpane {
+            row {
+                stackpane {
+                    orientationPanes += this
+                    emptyRectangle()
+                }
+                stackpane {
+                    orientationPanes += this
+                    emptyRectangle()
+                }
+            }
+            row {
+                stackpane {
+                    orientationPanes += this
+                    emptyRectangle()
+                }
+                stackpane {
+                    orientationPanes += this
+                    emptyRectangle()
+                }
+            }
+        }
+        thickSeparator()
+        for (color in colors) {
+            vbox {
+                stackpane {
+                    emptyRectangle()
+                    showKing(color)
+                }
+                stackpane {
+                    emptyRectangle()
+                    text(game.score(color).toString())
+                }
+            }
+            separator()
+        }
+    }
+
     private fun choiceMade(nextIndex: Int) {
         val state = game.state
         if (state !is GameState.MapNextPatch) {
@@ -198,6 +254,14 @@ class MainView : View("Лоскутное королевство") {
             return
         }
         nextChoicePanes[nextIndex].choice.showKing(state.color)
+        showCurrentTurn()
+    }
+
+    private fun showCurrentTurn() {
+        val color = game.colorToMove ?: return
+        (turnPane.children[1] as Circle).apply {
+            fill = color.toGraphicColor()
+        }
     }
 
     private fun showNextPatches() {

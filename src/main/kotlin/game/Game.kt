@@ -10,6 +10,8 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
 
     val turn: Int get() = state.turn
 
+    val colorToMove: PlayerColor? get() = state.color
+
     val choiceDepth = if (players.size == 2) 4 else players.size
 
     var nextPatches = deck.take(choiceDepth)
@@ -60,6 +62,10 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
         return kingdoms.mapValues { (_, kingdom) ->
             kingdom.score()
         }
+    }
+
+    fun score(color: PlayerColor): Int {
+        return kingdom(color).score()
     }
 
     fun nextTurn(move: GameMove): Boolean {
