@@ -1,5 +1,7 @@
 package core
 
+import java.lang.AssertionError
+
 class Kingdom(val size: Int) {
     val squares = mutableMapOf(Point(0, 0) to Square(Terrain.CENTER))
 
@@ -17,7 +19,7 @@ class Kingdom(val size: Int) {
 
     private val overflown: Boolean get() = dimension > size
 
-    fun addPatch(point: Point, patch: DirectedPatch): Boolean {
+    fun isPatchApplicable(point: Point, patch: DirectedPatch): Boolean {
         if (point in squares) return false
         val secondPoint = point + patch.direction
         if (secondPoint in squares) return false
@@ -26,14 +28,24 @@ class Kingdom(val size: Int) {
                         patch.second.sameWith(squares[secondPoint + direction])
             }
         ) return false
+        val minX = minOf(minX, point.x, secondPoint.x)
+        val maxX = maxOf(maxX, point.x, secondPoint.x)
+        val minY = minOf(minY, point.y, secondPoint.y)
+        val maxY = maxOf(maxY, point.y, secondPoint.y)
+        if (maxX - minX >= size || maxY - minY >= size) return false
+        return true
+    }
+
+    fun addPatch(point: Point, patch: DirectedPatch): Boolean {
+        if (isPatchApplicable(point, patch)) return false
+        val secondPoint = point + patch.direction
 
         patches += (point to patch)
         squares[point] = patch.first
         squares[secondPoint] = patch.second
 
         if (overflown) {
-            removeLastPatch()
-            return false
+            throw AssertionError("Overflown! Should not be here!")
         }
 
         return true

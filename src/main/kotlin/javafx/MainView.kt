@@ -40,6 +40,12 @@ class MainView : View("Лоскутное королевство") {
 
     private lateinit var currentPatchToPlace: Patch
 
+    private lateinit var currentPointToPlace: Point
+
+    private var currentFirstPatchPane: StackPane? = null
+
+    private var currentSecondPatchPane: StackPane? = null
+
     private fun kingdom(player: PlayerColor) = game.kingdom(player)
 
     override val root = BorderPane()
@@ -137,7 +143,7 @@ class MainView : View("Лоскутное королевство") {
         }
     }
 
-    private class KingdomPane(val grid: GridPane, val cells: Map<Point, StackPane>)
+    private class KingdomPane(val cells: Map<Point, StackPane>)
 
     private fun VBox.kingdomPane(color: PlayerColor): KingdomPane {
         val limit = kingdomSize - 1
@@ -147,20 +153,49 @@ class MainView : View("Лоскутное королевство") {
                 row {
                     for (x in -limit..limit) {
                         stackpane {
-                            cells[Point(x, y)] = this
+                            val point = Point(x, y)
+                            cells[point] = this
                             emptyRectangle()
                             if (x == 0 && y == 0) {
                                 kingCircle()
                                 showKing(color)
+                            } else {
+                                setOnMouseMoved {
+                                    currentFirstPatchPane?.showSquare()
+                                    currentSecondPatchPane?.showSquare()
+                                    currentPointToPlace = point
+                                    showPatchToPlaceIfApplicable(color)
+                                }
                             }
                         }
                     }
                 }
             }
         }
-        val result = KingdomPane(grid, cells)
+        val result = KingdomPane(cells)
         kingdomPanes[color] = result
         return result
+    }
+
+    private fun showPatchToPlaceIfApplicable(color: PlayerColor) {
+        val state = game.state
+        if (color != game.colorToMove || state !is GameState.PlaceCurrentPatch) {
+            return
+        }
+        val directedPatch = DirectedPatch(currentPatchToPlace, currentDirection)
+        val kingdom = kingdom(color)
+        if (!kingdom.isPatchApplicable(currentPointToPlace, directedPatch)) {
+            return
+        }
+        val firstPoint = currentPointToPlace
+        val secondPoint = currentPointToPlace + currentDirection
+        val pane = kingdomPanes.getValue(color)
+        currentFirstPatchPane = pane.cells.getValue(firstPoint).apply {
+            showSquare(currentPatchToPlace.first)
+        }
+        currentSecondPatchPane = pane.cells.getValue(secondPoint).apply {
+            showSquare(currentPatchToPlace.second)
+        }
     }
 
     private class ChoicePane(val choice: StackPane, val left: StackPane, val right: StackPane)
@@ -314,6 +349,10 @@ class MainView : View("Лоскутное королевство") {
     }
 
     private fun showOrientationPane() {
+        currentFirstPatchPane?.showSquare()
+        currentSecondPatchPane?.showSquare()
+        currentFirstPatchPane = null
+        currentSecondPatchPane = null
         val state = game.state
         if (state !is GameState.PlaceCurrentPatch) {
             return
