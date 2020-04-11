@@ -127,6 +127,6 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
                 }
             }
         }
-        return false
+        return true
     }
 }

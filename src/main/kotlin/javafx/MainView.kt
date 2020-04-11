@@ -5,6 +5,8 @@ import core.Point
 import core.Square
 import core.Terrain
 import game.Game
+import game.GameMove
+import game.GameState
 import javafx.geometry.Orientation
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
@@ -20,7 +22,9 @@ class MainView : View("Лоскутное королевство") {
 
     private val kingdomSize = if (playerNumber == 2) 7 else 5
 
-    private val game = Game(size = kingdomSize, players = colors, turns = 12)
+    private val game = Game(size = kingdomSize, players = colors, turns = 12).apply {
+        nextTurn(GameMove.None)
+    }
 
     private val choiceDepth = game.choiceDepth
 
@@ -131,9 +135,7 @@ class MainView : View("Лоскутное королевство") {
                             cells[Point(x, y)] = this
                             emptyRectangle()
                             if (x == 0 && y == 0) {
-                                circle(radius = cellSize / 3) {
-                                    fill = color.toGraphicColor()
-                                }
+                                showKing(color)
                             }
                         }
                     }
@@ -149,25 +151,30 @@ class MainView : View("Лоскутное королевство") {
 
     private fun VBox.choicePanes() {
         for (i in 0 until choiceDepth) {
-            choicePane().apply {
+            choicePane(i).apply {
                 currentChoicePanes += this
             }
             separator()
         }
         thickSeparator()
         for (i in 0 until choiceDepth) {
-            choicePane().apply {
+            choicePane(i, handleClicks = true).apply {
                 nextChoicePanes += this
             }
             separator()
         }
     }
 
-    private fun VBox.choicePane(): ChoicePane {
+    private fun VBox.choicePane(index: Int, handleClicks: Boolean = false): ChoicePane {
         lateinit var result: ChoicePane
         hbox {
             val choice = stackpane {
                 emptyRectangle()
+                if (handleClicks) {
+                    setOnMousePressed {
+                        choiceMade(index)
+                    }
+                }
             }
             val left = stackpane {
                 emptyRectangle()
@@ -179,6 +186,18 @@ class MainView : View("Лоскутное королевство") {
             result = ChoicePane(choice, left, right)
         }
         return result
+    }
+
+    private fun choiceMade(nextIndex: Int) {
+        val state = game.state
+        if (state !is GameState.MapNextPatch) {
+            return
+        }
+        if (!game.nextTurn(GameMove.MapNextPatch(nextIndex))) {
+            println("unsuccessful!")
+            return
+        }
+        nextChoicePanes[nextIndex].choice.showKing(state.color)
     }
 
     private fun showNextPatches() {
@@ -194,6 +213,12 @@ class MainView : View("Лоскутное королевство") {
         }
         if (square.crowns > 0) {
             text("${square.crowns}")
+        }
+    }
+
+    private fun StackPane.showKing(color: PlayerColor) {
+        circle(radius = cellSize / 3) {
+            fill = color.toGraphicColor()
         }
     }
 
