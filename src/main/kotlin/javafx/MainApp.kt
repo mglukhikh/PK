@@ -4,17 +4,13 @@ import core.PlayerColor
 import javafx.application.Application
 import javafx.scene.control.Alert
 import javafx.scene.control.ButtonBar
-import javafx.scene.layout.BorderPane
 import javafx.stage.Stage
 import tornadofx.App
-import tornadofx.View
 import tornadofx.alert
 
-class MainView : View("Лоскутное королевство") {
-    override val root = BorderPane()
-}
-
 class MainApp : App(MainView::class) {
+
+    val colorChoices = mutableMapOf<PlayerColor, PlayerChoice>()
 
     override fun start(stage: Stage) {
         //Sets up dialog before main application.
@@ -26,9 +22,13 @@ class MainApp : App(MainView::class) {
             if (choices.count { it != PlayerChoice.NONE } < 2) {
                 alert(Alert.AlertType.ERROR, "Выбрано слишком мало игроков!")
             } else {
-                val playersDescription = choices.withIndex().filter { (_, choice) ->
+                val indexedPlayerChoices = choices.withIndex().filter { (_, choice) ->
                     choice != PlayerChoice.NONE
-                }.joinToString { (index, choice) ->
+                }
+                indexedPlayerChoices.associateTo(colorChoices) { (index, choice) ->
+                    PlayerColor.values()[index] to choice
+                }
+                val playersDescription = indexedPlayerChoices.joinToString { (index, choice) ->
                     PlayerColor.values()[index].str + " " + choice.str
                 }
                 alert(Alert.AlertType.INFORMATION, "Играют", playersDescription)

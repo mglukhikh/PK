@@ -22,7 +22,13 @@ class StartDialogController {
     fun initialize() {
         listOf(yellow, red, green, blue).forEach { box ->
             box.items.addAll(comboContent.toTypedArray())
-            box.selectionModel.select(0)
+            box.selectionModel.select(
+                when(box) {
+                    yellow -> 1
+                    red -> 2
+                    else -> 0
+                }
+            )
         }
     }
 
