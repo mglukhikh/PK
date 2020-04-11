@@ -6,7 +6,7 @@ import player.AbstractPlayer
 class GameRunner(val size: Int, val playerNumber: Int) {
     val colors = PlayerColor.values().take(playerNumber).shuffled(kotlin.random.Random)
 
-    val game = Game(size, colors)
+    val game = Game(size, colors, turns = 12)
 
     val players = mutableMapOf<PlayerColor, AbstractPlayer>()
 

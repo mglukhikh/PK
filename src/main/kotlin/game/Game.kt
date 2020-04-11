@@ -10,7 +10,9 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
 
     val turn: Int get() = state.turn
 
-    var nextPatches = deck.take(players.size)
+    val choiceDepth = if (players.size == 2) 4 else players.size
+
+    var nextPatches = deck.take(choiceDepth)
         private set
 
     val nextPatchMapping = mutableMapOf<Int, PlayerColor>()
@@ -40,7 +42,7 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
     fun transferPatchesToCurrent(regenerateNext: Boolean) {
         currentPatches = nextPatches
         currentPatchMapping = nextPatchMapping.toMutableMap()
-        nextPatches = if (regenerateNext) deck.take(players.size) else emptyList()
+        nextPatches = if (regenerateNext) deck.take(choiceDepth) else emptyList()
         nextPatchMapping.clear()
     }
 
