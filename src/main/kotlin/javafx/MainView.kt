@@ -2,6 +2,8 @@ package javafx
 
 import core.PlayerColor
 import core.Point
+import core.Square
+import core.Terrain
 import game.Game
 import javafx.geometry.Orientation
 import javafx.scene.layout.*
@@ -45,21 +47,10 @@ class MainView : View("Лоскутное королевство") {
             // Зона выбора
             right {
                 vbox {
-                    for (i in 0 until choiceDepth) {
-                        choicePane().apply {
-                            currentChoicePanes += this
-                        }
-                        separator()
-                    }
-                    thickSeparator()
-                    for (i in 0 until choiceDepth) {
-                        choicePane().apply {
-                            nextChoicePanes += this
-                        }
-                        separator()
-                    }
+                    choicePanes()
                 }
             }
+            showNextPatches()
         }
     }
 
@@ -129,8 +120,6 @@ class MainView : View("Лоскутное королевство") {
 
     private class KingdomPane(val grid: GridPane, val cells: Map<Point, StackPane>)
 
-    private class ChoicePane(val choice: StackPane, val left: StackPane, val right: StackPane)
-
     private fun VBox.kingdomPane(color: PlayerColor): KingdomPane {
         val limit = kingdomSize - 1
         val cells = mutableMapOf<Point, StackPane>()
@@ -156,6 +145,24 @@ class MainView : View("Лоскутное королевство") {
         return result
     }
 
+    private class ChoicePane(val choice: StackPane, val left: StackPane, val right: StackPane)
+
+    private fun VBox.choicePanes() {
+        for (i in 0 until choiceDepth) {
+            choicePane().apply {
+                currentChoicePanes += this
+            }
+            separator()
+        }
+        thickSeparator()
+        for (i in 0 until choiceDepth) {
+            choicePane().apply {
+                nextChoicePanes += this
+            }
+            separator()
+        }
+    }
+
     private fun VBox.choicePane(): ChoicePane {
         lateinit var result: ChoicePane
         hbox {
@@ -174,6 +181,22 @@ class MainView : View("Лоскутное королевство") {
         return result
     }
 
+    private fun showNextPatches() {
+        game.nextPatches.forEachIndexed { index, patch ->
+            nextChoicePanes[index].left.showSquare(patch.first)
+            nextChoicePanes[index].right.showSquare(patch.second)
+        }
+    }
+
+    private fun StackPane.showSquare(square: Square) {
+        (children[0] as Rectangle).apply {
+            fill = square.terrain.toGraphicColor()
+        }
+        if (square.crowns > 0) {
+            text("${square.crowns}")
+        }
+    }
+
     private fun StackPane.emptyRectangle(): Rectangle {
         return rectangle(width = cellSize, height = cellSize) {
             stroke = Color.BLACK
@@ -187,6 +210,18 @@ class MainView : View("Лоскутное королевство") {
             PlayerColor.RED -> Color.RED
             PlayerColor.GREEN -> Color.GREEN
             PlayerColor.BLUE -> Color.BLUE
+        }
+    }
+
+    private fun Terrain.toGraphicColor(): Color {
+        return when (this) {
+            Terrain.CENTER -> Color.LIGHTGRAY
+            Terrain.PLAIN -> Color.LEMONCHIFFON
+            Terrain.FOREST -> Color.DARKGREEN
+            Terrain.WATER -> Color.SKYBLUE
+            Terrain.GRASS -> Color.LIGHTGREEN
+            Terrain.SWAMP -> Color.BROWN
+            Terrain.MINE -> Color.BEIGE
         }
     }
 
