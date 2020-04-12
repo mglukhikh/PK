@@ -5,6 +5,7 @@ import game.Game
 import game.GameMove
 import game.GameState
 import javafx.geometry.Orientation
+import javafx.scene.control.Alert
 import javafx.scene.layout.*
 import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
@@ -396,6 +397,16 @@ class MainView : View("Лоскутное королевство") {
                 }
             }
             separator()
+        }
+        thickSeparator()
+        button("Пропустить ход!").setOnAction {
+            if (!game.nextTurn(GameMove.None)) {
+                alert(Alert.AlertType.WARNING, "Сейчас пропустить ход нельзя!")
+            } else {
+                showCurrentTurn()
+                currentPatchIndex = (currentPatchIndex + 1) % choiceDepth
+                clearOrientationPane()
+            }
         }
     }
 
