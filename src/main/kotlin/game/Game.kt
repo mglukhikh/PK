@@ -92,7 +92,7 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
                         this.state = GameState.PlaceCurrentPatch(1, currentPatchMapping.getValue(0))
                     }
                 } else {
-                    val nextColor = currentPatchMapping.values.firstOrNull()
+                    val nextColor = currentPatchMapping.entries.minBy { (index, _) -> index }?.value
                     if (nextColor != null) {
                         this.state = GameState.PlaceCurrentPatch(turn, nextColor)
                     } else {
