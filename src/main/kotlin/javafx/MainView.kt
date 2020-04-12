@@ -497,8 +497,8 @@ class MainView : View("Лоскутное королевство") {
             Terrain.FOREST -> Color.DARKGREEN
             Terrain.WATER -> Color.SKYBLUE
             Terrain.GRASS -> Color.LIGHTGREEN
-            Terrain.SWAMP -> Color.BROWN
-            Terrain.MINE -> Color.BEIGE
+            Terrain.SWAMP -> Color.DARKGOLDENROD
+            Terrain.MINE -> Color.BROWN
         }
     }
 
