@@ -234,6 +234,10 @@ class MainView : View("Лоскутное королевство") {
         secondDominoPane.showSquare(currentDominoToPlace.second)
         showCurrentTurn()
         showScore(color)
+        handleNextGameState()
+    }
+
+    private fun handleNextGameState() {
         when (game.state) {
             is GameState.PlaceCurrentDomino -> {
                 currentDominoIndex = (currentDominoIndex + 1) % choiceDepth
@@ -246,10 +250,21 @@ class MainView : View("Лоскутное королевство") {
                 currentDominoIndex = (currentDominoIndex + 1) % choiceDepth
                 clearOrientationPane()
             }
-            else -> {
-
+            is GameState.End -> {
+                clearOrientationPane()
+                gameOverAlert()
+            }
+            is GameState.Start -> {
+                throw AssertionError("Should not be here")
             }
         }
+    }
+
+    private fun gameOverAlert() {
+        alert(Alert.AlertType.CONFIRMATION, "Игра окончена!",
+            "Очков набрано: ${game.scores().entries.joinToString { (color, score) ->
+                "${color.str}: $score"
+            }}")
     }
 
     // =======================================================================
@@ -411,8 +426,7 @@ class MainView : View("Лоскутное королевство") {
                 alert(Alert.AlertType.WARNING, "Сейчас пропустить ход нельзя!")
             } else {
                 showCurrentTurn()
-                currentDominoIndex = (currentDominoIndex + 1) % choiceDepth
-                clearOrientationPane()
+                handleNextGameState()
             }
         }
     }
