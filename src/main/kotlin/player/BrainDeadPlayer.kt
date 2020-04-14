@@ -8,7 +8,7 @@ class BrainDeadPlayer : AbstractPlayer() {
         assert(game.state.color == color)
         return when (game.state) {
             is GameState.MapNextDomino -> {
-                val chosen = game.nextDominos.indices.find { index ->
+                val chosen = game.nextDomino.indices.find { index ->
                     index !in game.nextDominoMapping
                 } ?: throw AssertionError("No dominos to choose")
                 GameMove.MapNextDomino(chosen)

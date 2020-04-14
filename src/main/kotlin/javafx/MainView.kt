@@ -81,7 +81,7 @@ class MainView : View("Лоскутное королевство") {
                     }
                 }
             }
-            showNextDominos()
+            showNextDomino()
         }
     }
 
@@ -237,9 +237,9 @@ class MainView : View("Лоскутное королевство") {
         when (game.state) {
             is GameState.PlaceCurrentDomino -> {
                 currentDominoIndex = (currentDominoIndex + 1) % choiceDepth
-                showCurrentDominos()
-                showNextDominos()
-                currentDominoToPlace = game.currentDominos[currentDominoIndex]
+                showCurrentDomino()
+                showNextDomino()
+                currentDominoToPlace = game.currentDomino[currentDominoIndex]
                 showOrientationPane()
             }
             is GameState.MapNextDomino -> {
@@ -309,23 +309,23 @@ class MainView : View("Лоскутное королевство") {
         nextChoicePanes[nextIndex].choice.showKing(state.color)
         showCurrentTurn()
         if (game.state is GameState.PlaceCurrentDomino) {
-            showCurrentDominos()
-            showNextDominos()
-            currentDominoToPlace = game.currentDominos[currentDominoIndex]
+            showCurrentDomino()
+            showNextDomino()
+            currentDominoToPlace = game.currentDomino[currentDominoIndex]
             showOrientationPane()
         }
     }
 
-    private fun showCurrentDominos() {
-        showDominosForChoice(game.currentDominos, game.currentDominoMapping, currentChoicePanes)
+    private fun showCurrentDomino() {
+        showDominoForChoice(game.currentDomino, game.currentDominoMapping, currentChoicePanes)
     }
 
-    private fun showNextDominos() {
-        showDominosForChoice(game.nextDominos, game.nextDominoMapping, nextChoicePanes)
+    private fun showNextDomino() {
+        showDominoForChoice(game.nextDomino, game.nextDominoMapping, nextChoicePanes)
     }
 
-    private fun showDominosForChoice(dominos: List<Domino>, mapping: Map<Int, PlayerColor>, panes: List<ChoicePane>) {
-        if (dominos.isEmpty()) {
+    private fun showDominoForChoice(dominoList: List<Domino>, mapping: Map<Int, PlayerColor>, panes: List<ChoicePane>) {
+        if (dominoList.isEmpty()) {
             for (index in 0 until choiceDepth) {
                 panes[index].choice.showKing(null)
                 panes[index].left.showSquare(Square(Terrain.CENTER))
@@ -333,7 +333,7 @@ class MainView : View("Лоскутное королевство") {
             }
             return
         }
-        dominos.forEachIndexed { index, domino ->
+        dominoList.forEachIndexed { index, domino ->
             val kingColor = mapping[index]
             panes[index].choice.showKing(kingColor)
             panes[index].left.showSquare(domino.first)

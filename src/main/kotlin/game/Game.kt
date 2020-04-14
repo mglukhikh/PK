@@ -14,12 +14,12 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
 
     val choiceDepth = if (players.size == 2) 4 else players.size
 
-    var nextDominos = deck.take(choiceDepth)
+    var nextDomino = deck.take(choiceDepth)
         private set
 
     val nextDominoMapping = mutableMapOf<Int, PlayerColor>()
 
-    var currentDominos = emptyList<Domino>()
+    var currentDomino = emptyList<Domino>()
         private set
 
     var currentDominoMapping = mutableMapOf<Int, PlayerColor>()
@@ -28,7 +28,7 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
     private val kingdoms = players.associateWith { Kingdom(size) }
 
     fun mapNextDomino(player: PlayerColor, index: Int): Boolean {
-        if (index !in nextDominos.indices) {
+        if (index !in nextDomino.indices) {
             throw AssertionError("Incorrect domino index: $index")
         }
         return nextDominoMapping.put(index, player) == null
@@ -37,14 +37,14 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
     fun takeCurrentDomino(index: Int): Pair<PlayerColor, Domino>? {
         val color = currentDominoMapping[index] ?: return null
         currentDominoMapping.remove(index)
-        val domino = currentDominos[index]
+        val domino = currentDomino[index]
         return color to domino
     }
 
-    fun transferDominosToCurrent(regenerateNext: Boolean) {
-        currentDominos = nextDominos
+    fun transferDominoToCurrent(regenerateNext: Boolean) {
+        currentDomino = nextDomino
         currentDominoMapping = nextDominoMapping.toMutableMap()
-        nextDominos = if (regenerateNext) deck.take(choiceDepth) else emptyList()
+        nextDomino = if (regenerateNext) deck.take(choiceDepth) else emptyList()
         nextDominoMapping.clear()
     }
 
@@ -88,7 +88,7 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
                     if (playerIndex < players.size - 1) {
                         this.state = GameState.MapNextDomino(0, players[playerIndex + 1])
                     } else {
-                        transferDominosToCurrent(regenerateNext = true)
+                        transferDominoToCurrent(regenerateNext = true)
                         this.state = GameState.PlaceCurrentDomino(1, currentDominoMapping.getValue(0))
                     }
                 } else {
@@ -99,7 +99,7 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
                         if (turn == turns) {
                             this.state = GameState.End
                         } else {
-                            transferDominosToCurrent(regenerateNext = turn < turns - 1)
+                            transferDominoToCurrent(regenerateNext = turn < turns - 1)
                             this.state = GameState.PlaceCurrentDomino(turn + 1, currentDominoMapping.getValue(0))
                         }
                     }
@@ -113,7 +113,7 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
                     it.value == state.color
                 }!!.key
                 if (move is GameMove.PlaceCurrentDomino) {
-                    if (!addDomino(state.color, move.point, DirectedDomino(currentDominos[index], move.direction))) {
+                    if (!addDomino(state.color, move.point, DirectedDomino(currentDomino[index], move.direction))) {
                         return false
                     }
                 }
