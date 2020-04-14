@@ -23,8 +23,8 @@ class GameRunner(val size: Int, val playerNumber: Int) {
         while (game.state != GameState.End) {
             val move = when (val state = game.state) {
                 is GameState.Start, is GameState.End -> GameMove.None
-                is GameState.MapNextPatch -> players[state.color]!!.nextMove()
-                is GameState.PlaceCurrentPatch -> players[state.color]!!.nextMove()
+                is GameState.MapNextDomino -> players[state.color]!!.nextMove()
+                is GameState.PlaceCurrentDomino -> players[state.color]!!.nextMove()
             }
             game.nextTurn(move)
         }

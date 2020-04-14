@@ -62,15 +62,15 @@ private val rawDeck = listOf(
     Pair(63, 10)
 )
 
-internal fun Int.toDeckPatch(direction: Direction): DirectedPatch =
-    DirectedPatch(Patch(this + 1, rawDeck[this].first, rawDeck[this].second), direction)
+internal fun Int.toDeckDomino(direction: Direction): DirectedDomino =
+    DirectedDomino(Domino(this + 1, rawDeck[this].first, rawDeck[this].second), direction)
 
 class Deck {
     private var deck = rawDeck.mapIndexed { index, (first, second) ->
-        Patch(index + 1, first, second)
+        Domino(index + 1, first, second)
     }.shuffled(Random)
 
-    fun take(num: Int): List<Patch> {
+    fun take(num: Int): List<Domino> {
         val result = deck.takeLast(num).sortedBy { it.number }
         deck = deck.dropLast(num)
         return result

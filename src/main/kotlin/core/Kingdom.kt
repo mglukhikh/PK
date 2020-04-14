@@ -5,7 +5,7 @@ import java.lang.AssertionError
 class Kingdom(private val size: Int) {
     private val squares = mutableMapOf(Point(0, 0) to Square(Terrain.CENTER))
 
-    private val patches = mutableListOf<Pair<Point, DirectedPatch>>()
+    private val dominos = mutableListOf<Pair<Point, DirectedDomino>>()
 
     private val minX: Int get() = squares.keys.minBy { it.x }!!.x
 
@@ -19,13 +19,13 @@ class Kingdom(private val size: Int) {
 
     private val overflown: Boolean get() = dimension > size
 
-    fun isPatchApplicable(point: Point, patch: DirectedPatch): Boolean {
+    fun isDominoApplicable(point: Point, domino: DirectedDomino): Boolean {
         if (point in squares) return false
-        val secondPoint = point + patch.direction
+        val secondPoint = point + domino.direction
         if (secondPoint in squares) return false
         if (Direction.values().none { direction ->
-                patch.first.sameWith(squares[point + direction]) ||
-                        patch.second.sameWith(squares[secondPoint + direction])
+                domino.first.sameWith(squares[point + direction]) ||
+                        domino.second.sameWith(squares[secondPoint + direction])
             }
         ) return false
         val minX = minOf(minX, point.x, secondPoint.x)
@@ -36,13 +36,13 @@ class Kingdom(private val size: Int) {
         return true
     }
 
-    fun addPatch(point: Point, patch: DirectedPatch): Boolean {
-        if (!isPatchApplicable(point, patch)) return false
-        val secondPoint = point + patch.direction
+    fun addDomino(point: Point, domino: DirectedDomino): Boolean {
+        if (!isDominoApplicable(point, domino)) return false
+        val secondPoint = point + domino.direction
 
-        patches += (point to patch)
-        squares[point] = patch.first
-        squares[secondPoint] = patch.second
+        dominos += (point to domino)
+        squares[point] = domino.first
+        squares[secondPoint] = domino.second
 
         if (overflown) {
             throw AssertionError("Overflown! Should not be here!")
@@ -51,14 +51,14 @@ class Kingdom(private val size: Int) {
         return true
     }
 
-    fun removeLastPatch() {
-        if (patches.isEmpty()) {
-            throw IllegalStateException("No patch to remove")
+    fun removeLastDomino() {
+        if (dominos.isEmpty()) {
+            throw IllegalStateException("No domino to remove")
         }
-        val (point, patch) = patches.last()
-        patches.removeAt(patches.size - 1)
+        val (point, domino) = dominos.last()
+        dominos.removeAt(dominos.size - 1)
         squares.remove(point)
-        squares.remove(point + patch.direction)
+        squares.remove(point + domino.direction)
     }
 
     fun score(): Int {

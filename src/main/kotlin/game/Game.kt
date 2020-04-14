@@ -14,48 +14,48 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
 
     val choiceDepth = if (players.size == 2) 4 else players.size
 
-    var nextPatches = deck.take(choiceDepth)
+    var nextDominos = deck.take(choiceDepth)
         private set
 
-    val nextPatchMapping = mutableMapOf<Int, PlayerColor>()
+    val nextDominoMapping = mutableMapOf<Int, PlayerColor>()
 
-    var currentPatches = emptyList<Patch>()
+    var currentDominos = emptyList<Domino>()
         private set
 
-    var currentPatchMapping = mutableMapOf<Int, PlayerColor>()
+    var currentDominoMapping = mutableMapOf<Int, PlayerColor>()
         private set
 
     private val kingdoms = players.associateWith { Kingdom(size) }
 
-    fun mapNextPatch(player: PlayerColor, index: Int): Boolean {
-        if (index !in nextPatches.indices) {
-            throw AssertionError("Incorrect patch index: $index")
+    fun mapNextDomino(player: PlayerColor, index: Int): Boolean {
+        if (index !in nextDominos.indices) {
+            throw AssertionError("Incorrect domino index: $index")
         }
-        return nextPatchMapping.put(index, player) == null
+        return nextDominoMapping.put(index, player) == null
     }
 
-    fun takeCurrentPatch(index: Int): Pair<PlayerColor, Patch>? {
-        val color = currentPatchMapping[index] ?: return null
-        currentPatchMapping.remove(index)
-        val patch = currentPatches[index]
-        return color to patch
+    fun takeCurrentDomino(index: Int): Pair<PlayerColor, Domino>? {
+        val color = currentDominoMapping[index] ?: return null
+        currentDominoMapping.remove(index)
+        val domino = currentDominos[index]
+        return color to domino
     }
 
-    fun transferPatchesToCurrent(regenerateNext: Boolean) {
-        currentPatches = nextPatches
-        currentPatchMapping = nextPatchMapping.toMutableMap()
-        nextPatches = if (regenerateNext) deck.take(choiceDepth) else emptyList()
-        nextPatchMapping.clear()
+    fun transferDominosToCurrent(regenerateNext: Boolean) {
+        currentDominos = nextDominos
+        currentDominoMapping = nextDominoMapping.toMutableMap()
+        nextDominos = if (regenerateNext) deck.take(choiceDepth) else emptyList()
+        nextDominoMapping.clear()
     }
 
     fun kingdom(player: PlayerColor) = kingdoms.getValue(player)
 
-    fun addPatch(player: PlayerColor, point: Point, patch: DirectedPatch): Boolean {
-        return kingdoms.getValue(player).addPatch(point, patch)
+    fun addDomino(player: PlayerColor, point: Point, domino: DirectedDomino): Boolean {
+        return kingdoms.getValue(player).addDomino(point, domino)
     }
 
-    fun removeLastPatch(player: PlayerColor) {
-        kingdoms.getValue(player).removeLastPatch()
+    fun removeLastDomino(player: PlayerColor) {
+        kingdoms.getValue(player).removeLastDomino()
     }
 
     fun scores(): Map<PlayerColor, Int> {
@@ -71,61 +71,61 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
     fun nextTurn(move: GameMove): Boolean {
         when (val state = state) {
             is GameState.Start -> {
-                this.state = GameState.MapNextPatch(0, players[0])
+                this.state = GameState.MapNextDomino(0, players[0])
             }
             is GameState.End -> {
                 return false
             }
-            is GameState.MapNextPatch -> {
-                if (move !is GameMove.MapNextPatch) {
+            is GameState.MapNextDomino -> {
+                if (move !is GameMove.MapNextDomino) {
                     return false
                 }
-                if (!mapNextPatch(state.color, move.index)) {
+                if (!mapNextDomino(state.color, move.index)) {
                     return false
                 }
                 if (turn == 0) {
                     val playerIndex = players.indexOf(state.color)
                     if (playerIndex < players.size - 1) {
-                        this.state = GameState.MapNextPatch(0, players[playerIndex + 1])
+                        this.state = GameState.MapNextDomino(0, players[playerIndex + 1])
                     } else {
-                        transferPatchesToCurrent(regenerateNext = true)
-                        this.state = GameState.PlaceCurrentPatch(1, currentPatchMapping.getValue(0))
+                        transferDominosToCurrent(regenerateNext = true)
+                        this.state = GameState.PlaceCurrentDomino(1, currentDominoMapping.getValue(0))
                     }
                 } else {
-                    val nextColor = currentPatchMapping.entries.minBy { (index, _) -> index }?.value
+                    val nextColor = currentDominoMapping.entries.minBy { (index, _) -> index }?.value
                     if (nextColor != null) {
-                        this.state = GameState.PlaceCurrentPatch(turn, nextColor)
+                        this.state = GameState.PlaceCurrentDomino(turn, nextColor)
                     } else {
                         if (turn == turns) {
                             this.state = GameState.End
                         } else {
-                            transferPatchesToCurrent(regenerateNext = turn < turns - 1)
-                            this.state = GameState.PlaceCurrentPatch(turn + 1, currentPatchMapping.getValue(0))
+                            transferDominosToCurrent(regenerateNext = turn < turns - 1)
+                            this.state = GameState.PlaceCurrentDomino(turn + 1, currentDominoMapping.getValue(0))
                         }
                     }
                 }
             }
-            is GameState.PlaceCurrentPatch -> {
-                if (move is GameMove.MapNextPatch) {
+            is GameState.PlaceCurrentDomino -> {
+                if (move is GameMove.MapNextDomino) {
                     return false
                 }
-                val index = currentPatchMapping.entries.find {
+                val index = currentDominoMapping.entries.find {
                     it.value == state.color
                 }!!.key
-                if (move is GameMove.PlaceCurrentPatch) {
-                    if (!addPatch(state.color, move.point, DirectedPatch(currentPatches[index], move.direction))) {
+                if (move is GameMove.PlaceCurrentDomino) {
+                    if (!addDomino(state.color, move.point, DirectedDomino(currentDominos[index], move.direction))) {
                         return false
                     }
                 }
-                takeCurrentPatch(index)
+                takeCurrentDomino(index)
                 if (turn < turns) {
-                    this.state = GameState.MapNextPatch(turn, state.color)
+                    this.state = GameState.MapNextDomino(turn, state.color)
                 } else {
-                    if (currentPatchMapping.isEmpty()) {
+                    if (currentDominoMapping.isEmpty()) {
                         this.state = GameState.End
                     } else {
-                        this.state = GameState.PlaceCurrentPatch(
-                            turn, currentPatchMapping.entries.minBy { (index, _) ->
+                        this.state = GameState.PlaceCurrentDomino(
+                            turn, currentDominoMapping.entries.minBy { (index, _) ->
                                 index
                             }!!.value
                         )

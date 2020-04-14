@@ -40,15 +40,15 @@ class MainView : View("Лоскутное королевство") {
 
     private var currentDirection: Direction = Direction.TO_RIGHT
 
-    private var currentPatchIndex = 0
+    private var currentDominoIndex = 0
 
-    private lateinit var currentPatchToPlace: Patch
+    private lateinit var currentDominoToPlace: Domino
 
     private lateinit var currentPointToPlace: Point
 
-    private var currentFirstPatchPane: StackPane? = null
+    private var currentFirstDominoPane: StackPane? = null
 
-    private var currentSecondPatchPane: StackPane? = null
+    private var currentSecondDominoPane: StackPane? = null
 
     private val scorePanes = mutableMapOf<PlayerColor, StackPane>()
 
@@ -81,7 +81,7 @@ class MainView : View("Лоскутное королевство") {
                     }
                 }
             }
-            showNextPatches()
+            showNextDominos()
         }
     }
 
@@ -168,14 +168,14 @@ class MainView : View("Лоскутное королевство") {
                             } else {
                                 text()
                                 setOnMouseMoved {
-                                    currentFirstPatchPane?.showSquare()
-                                    currentSecondPatchPane?.showSquare()
+                                    currentFirstDominoPane?.showSquare()
+                                    currentSecondDominoPane?.showSquare()
                                     currentPointToPlace = point
-                                    showPatchToPlaceIfApplicable(color)
+                                    showDominoToPlaceIfApplicable(color)
                                 }
                                 setOnMousePressed {
                                     currentPointToPlace = point
-                                    placePatch(color)
+                                    placeDomino(color)
                                 }
                             }
                         }
@@ -188,62 +188,62 @@ class MainView : View("Лоскутное королевство") {
         return result
     }
 
-    private fun showPatchToPlaceIfApplicable(color: PlayerColor) {
+    private fun showDominoToPlaceIfApplicable(color: PlayerColor) {
         val state = game.state
-        if (color != game.colorToMove || state !is GameState.PlaceCurrentPatch) {
+        if (color != game.colorToMove || state !is GameState.PlaceCurrentDomino) {
             return
         }
-        val directedPatch = DirectedPatch(currentPatchToPlace, currentDirection)
+        val domino = DirectedDomino(currentDominoToPlace, currentDirection)
         val kingdom = kingdom(color)
-        if (!kingdom.isPatchApplicable(currentPointToPlace, directedPatch)) {
+        if (!kingdom.isDominoApplicable(currentPointToPlace, domino)) {
             return
         }
         val firstPoint = currentPointToPlace
         val secondPoint = currentPointToPlace + currentDirection
         val pane = kingdomPanes.getValue(color)
-        currentFirstPatchPane = pane.cells.getValue(firstPoint).apply {
-            showSquare(currentPatchToPlace.first)
+        currentFirstDominoPane = pane.cells.getValue(firstPoint).apply {
+            showSquare(currentDominoToPlace.first)
         }
-        currentSecondPatchPane = pane.cells.getValue(secondPoint).apply {
-            showSquare(currentPatchToPlace.second)
+        currentSecondDominoPane = pane.cells.getValue(secondPoint).apply {
+            showSquare(currentDominoToPlace.second)
         }
     }
 
-    private fun placePatch(color: PlayerColor) {
+    private fun placeDomino(color: PlayerColor) {
         val state = game.state
-        if (color != game.colorToMove || state !is GameState.PlaceCurrentPatch) {
+        if (color != game.colorToMove || state !is GameState.PlaceCurrentDomino) {
             return
         }
-        if (!game.nextTurn(GameMove.PlaceCurrentPatch(currentPointToPlace, currentDirection))) {
+        if (!game.nextTurn(GameMove.PlaceCurrentDomino(currentPointToPlace, currentDirection))) {
             return
         }
         val firstPoint = currentPointToPlace
         val secondPoint = currentPointToPlace + currentDirection
         val pane = kingdomPanes.getValue(color)
-        val firstPatchPane = pane.cells.getValue(firstPoint)
-        val secondPatchPane = pane.cells.getValue(secondPoint)
-        if (currentFirstPatchPane != firstPatchPane && currentFirstPatchPane != secondPatchPane) {
-            currentFirstPatchPane?.showSquare()
+        val firstDominoPane = pane.cells.getValue(firstPoint)
+        val secondDominoPane = pane.cells.getValue(secondPoint)
+        if (currentFirstDominoPane != firstDominoPane && currentFirstDominoPane != secondDominoPane) {
+            currentFirstDominoPane?.showSquare()
         }
-        currentFirstPatchPane = null
-        if (currentSecondPatchPane != firstPatchPane && currentSecondPatchPane != secondPatchPane) {
-            currentSecondPatchPane?.showSquare()
+        currentFirstDominoPane = null
+        if (currentSecondDominoPane != firstDominoPane && currentSecondDominoPane != secondDominoPane) {
+            currentSecondDominoPane?.showSquare()
         }
-        currentSecondPatchPane = null
-        firstPatchPane.showSquare(currentPatchToPlace.first)
-        secondPatchPane.showSquare(currentPatchToPlace.second)
+        currentSecondDominoPane = null
+        firstDominoPane.showSquare(currentDominoToPlace.first)
+        secondDominoPane.showSquare(currentDominoToPlace.second)
         showCurrentTurn()
         showScore(color)
         when (game.state) {
-            is GameState.PlaceCurrentPatch -> {
-                currentPatchIndex = (currentPatchIndex + 1) % choiceDepth
-                showCurrentPatches()
-                showNextPatches()
-                currentPatchToPlace = game.currentPatches[currentPatchIndex]
+            is GameState.PlaceCurrentDomino -> {
+                currentDominoIndex = (currentDominoIndex + 1) % choiceDepth
+                showCurrentDominos()
+                showNextDominos()
+                currentDominoToPlace = game.currentDominos[currentDominoIndex]
                 showOrientationPane()
             }
-            is GameState.MapNextPatch -> {
-                currentPatchIndex = (currentPatchIndex + 1) % choiceDepth
+            is GameState.MapNextDomino -> {
+                currentDominoIndex = (currentDominoIndex + 1) % choiceDepth
                 clearOrientationPane()
             }
             else -> {
@@ -300,37 +300,36 @@ class MainView : View("Лоскутное королевство") {
 
     private fun choiceMade(nextIndex: Int) {
         val state = game.state
-        if (state !is GameState.MapNextPatch) {
+        if (state !is GameState.MapNextDomino) {
             return
         }
-        if (!game.nextTurn(GameMove.MapNextPatch(nextIndex))) {
+        if (!game.nextTurn(GameMove.MapNextDomino(nextIndex))) {
             return
         }
         nextChoicePanes[nextIndex].choice.showKing(state.color)
         showCurrentTurn()
-        if (game.state is GameState.PlaceCurrentPatch) {
-            println("Current patch index: $currentPatchIndex")
-            showCurrentPatches()
-            showNextPatches()
-            currentPatchToPlace = game.currentPatches[currentPatchIndex]
+        if (game.state is GameState.PlaceCurrentDomino) {
+            showCurrentDominos()
+            showNextDominos()
+            currentDominoToPlace = game.currentDominos[currentDominoIndex]
             showOrientationPane()
         }
     }
 
-    private fun showCurrentPatches() {
-        showPatchesForChoice(game.currentPatches, game.currentPatchMapping, currentChoicePanes)
+    private fun showCurrentDominos() {
+        showDominosForChoice(game.currentDominos, game.currentDominoMapping, currentChoicePanes)
     }
 
-    private fun showNextPatches() {
-        showPatchesForChoice(game.nextPatches, game.nextPatchMapping, nextChoicePanes)
+    private fun showNextDominos() {
+        showDominosForChoice(game.nextDominos, game.nextDominoMapping, nextChoicePanes)
     }
 
-    private fun showPatchesForChoice(patches: List<Patch>, mapping: Map<Int, PlayerColor>, panes: List<ChoicePane>) {
-        patches.forEachIndexed { index, patch ->
+    private fun showDominosForChoice(dominos: List<Domino>, mapping: Map<Int, PlayerColor>, panes: List<ChoicePane>) {
+        dominos.forEachIndexed { index, domino ->
             val kingColor = mapping[index]
             panes[index].choice.showKing(kingColor)
-            panes[index].left.showSquare(patch.first)
-            panes[index].right.showSquare(patch.second)
+            panes[index].left.showSquare(domino.first)
+            panes[index].right.showSquare(domino.second)
         }
     }
 
@@ -404,7 +403,7 @@ class MainView : View("Лоскутное королевство") {
                 alert(Alert.AlertType.WARNING, "Сейчас пропустить ход нельзя!")
             } else {
                 showCurrentTurn()
-                currentPatchIndex = (currentPatchIndex + 1) % choiceDepth
+                currentDominoIndex = (currentDominoIndex + 1) % choiceDepth
                 clearOrientationPane()
             }
         }
@@ -425,19 +424,19 @@ class MainView : View("Лоскутное королевство") {
     }
 
     private fun showOrientationPane() {
-        currentFirstPatchPane?.showSquare()
-        currentSecondPatchPane?.showSquare()
-        currentFirstPatchPane = null
-        currentSecondPatchPane = null
+        currentFirstDominoPane?.showSquare()
+        currentSecondDominoPane?.showSquare()
+        currentFirstDominoPane = null
+        currentSecondDominoPane = null
         val state = game.state
-        if (state !is GameState.PlaceCurrentPatch) {
+        if (state !is GameState.PlaceCurrentDomino) {
             return
         }
         val mapping = orientationPaneMapping.getValue(currentDirection)
         orientationPanes.forEachIndexed { index, pane ->
             when (index) {
-                mapping.first -> pane.showSquare(currentPatchToPlace.first)
-                mapping.second -> pane.showSquare(currentPatchToPlace.second)
+                mapping.first -> pane.showSquare(currentDominoToPlace.first)
+                mapping.second -> pane.showSquare(currentDominoToPlace.second)
                 else -> pane.showSquare()
             }
         }
@@ -451,7 +450,7 @@ class MainView : View("Лоскутное королевство") {
 
     private fun changeOrientation(direction: Direction) {
         val state = game.state
-        if (state !is GameState.PlaceCurrentPatch) {
+        if (state !is GameState.PlaceCurrentDomino) {
             return
         }
         currentDirection = direction
