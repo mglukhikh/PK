@@ -350,7 +350,7 @@ class MainView : View("Лоскутное королевство") {
                     emptyRectangle()
                     text()
                     setOnMousePressed {
-                        changeOrientation(Direction.TO_UP)
+                        changeOrientation(Direction.TO_DOWN)
                     }
                 }
                 stackpane {
@@ -376,7 +376,7 @@ class MainView : View("Лоскутное королевство") {
                     emptyRectangle()
                     text()
                     setOnMousePressed {
-                        changeOrientation(Direction.TO_DOWN)
+                        changeOrientation(Direction.TO_UP)
                     }
                 }
             }
@@ -518,8 +518,8 @@ class MainView : View("Лоскутное королевство") {
         private val orientationPaneMapping = mutableMapOf(
             Direction.TO_RIGHT to (0 to 1),
             Direction.TO_LEFT to (3 to 2),
-            Direction.TO_DOWN to (1 to 3),
-            Direction.TO_UP to (2 to 0)
+            Direction.TO_UP to (1 to 3),
+            Direction.TO_DOWN to (2 to 0)
         )
     }
 }
