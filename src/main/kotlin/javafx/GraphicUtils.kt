@@ -8,18 +8,25 @@ import javafx.scene.layout.HBox
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
-import javafx.scene.shape.Circle
 import javafx.scene.shape.Rectangle
 import javafx.scene.shape.Shape
 import javafx.scene.text.Text
-import tornadofx.circle
+import tornadofx.polygon
 import tornadofx.rectangle
 import tornadofx.separator
 
 private const val cellSize = 40.0
 
-fun StackPane.kingCircle(): Circle {
-    return circle(radius = cellSize / 3) {
+fun StackPane.kingCircle(): Shape {
+    return polygon(
+        cellSize / 4, 7 * cellSize / 8,
+        cellSize / 8, cellSize / 8,
+        3 * cellSize / 8, cellSize / 2,
+        cellSize / 2, cellSize / 8,
+        5 * cellSize / 8, cellSize / 2,
+        7 * cellSize / 8, cellSize / 8,
+        3 * cellSize / 4, 7 * cellSize / 8
+    ) {
         fill = Color.LIGHTGRAY
     }
 }

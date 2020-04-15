@@ -7,6 +7,7 @@ import game.GameState
 import javafx.scene.control.Alert
 import javafx.scene.layout.*
 import javafx.scene.shape.Circle
+import javafx.scene.shape.Shape
 import javafx.scene.text.Text
 import tornadofx.*
 
@@ -422,9 +423,7 @@ class MainView : View("Лоскутное королевство") {
 
     private fun showCurrentTurn() {
         val color = game.colorToMove ?: return
-        (turnPane.children[1] as Circle).apply {
-            fill = color.toGraphicColor()
-        }
+        turnPane.showKing(color)
     }
 
     private fun showScore(color: PlayerColor) {
