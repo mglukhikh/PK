@@ -4,12 +4,9 @@ import core.*
 import game.Game
 import game.GameMove
 import game.GameState
-import javafx.geometry.Orientation
 import javafx.scene.control.Alert
 import javafx.scene.layout.*
-import javafx.scene.paint.Color
 import javafx.scene.shape.Circle
-import javafx.scene.shape.Rectangle
 import javafx.scene.text.Text
 import tornadofx.*
 
@@ -83,14 +80,6 @@ class MainView : View("Лоскутное королевство") {
             }
             showNextDomino()
         }
-    }
-
-    private fun HBox.thickSeparator() = separator(Orientation.VERTICAL) {
-        minWidth = cellSize * 2
-    }
-
-    private fun VBox.thickSeparator() = separator(Orientation.HORIZONTAL) {
-        minHeight = cellSize * 2
     }
 
     private fun BorderPane.kingdomsForTwo() {
@@ -481,62 +470,7 @@ class MainView : View("Лоскутное королевство") {
 
     // =======================================================================
 
-    private fun StackPane.kingCircle(): Circle {
-        return circle(radius = cellSize / 3) {
-            fill = Color.LIGHTGRAY
-        }
-    }
-
-    private fun StackPane.showSquare(square: Square? = null) {
-        (children[0] as Rectangle).apply {
-            fill = square?.terrain?.toGraphicColor() ?: Color.LIGHTGRAY
-        }
-        (children[1] as Text).apply {
-            text = if (square != null && square.crowns > 0) {
-                "${square.crowns}"
-            } else {
-                ""
-            }
-        }
-    }
-
-    private fun StackPane.showKing(color: PlayerColor?) {
-        (children[1] as Circle).apply {
-            fill = color?.toGraphicColor() ?: Color.LIGHTGRAY
-        }
-    }
-
-    private fun StackPane.emptyRectangle(): Rectangle {
-        return rectangle(width = cellSize, height = cellSize) {
-            stroke = Color.BLACK
-            fill = Color.LIGHTGRAY
-        }
-    }
-
-    private fun PlayerColor.toGraphicColor(): Color {
-        return when (this) {
-            PlayerColor.YELLOW -> Color.YELLOW
-            PlayerColor.RED -> Color.RED
-            PlayerColor.GREEN -> Color.GREEN
-            PlayerColor.BLUE -> Color.BLUE
-        }
-    }
-
-    private fun Terrain.toGraphicColor(): Color {
-        return when (this) {
-            Terrain.CENTER -> Color.LIGHTGRAY
-            Terrain.PLAIN -> Color.LEMONCHIFFON
-            Terrain.FOREST -> Color.DARKGREEN
-            Terrain.WATER -> Color.SKYBLUE
-            Terrain.GRASS -> Color.LIGHTGREEN
-            Terrain.SWAMP -> Color.DARKGOLDENROD
-            Terrain.MINE -> Color.BROWN
-        }
-    }
-
     companion object {
-        private const val cellSize = 40.0
-
         private val orientationPaneMapping = mutableMapOf(
             Direction.TO_RIGHT to (0 to 1),
             Direction.TO_LEFT to (3 to 2),
