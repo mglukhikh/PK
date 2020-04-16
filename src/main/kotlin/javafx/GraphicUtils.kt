@@ -31,6 +31,20 @@ fun StackPane.kingCrown(): Shape {
     }
 }
 
+fun StackPane.selectorArrow(): Shape {
+    return polygon(
+        cellSize / 6, cellSize / 3,
+        2 * cellSize / 3, cellSize / 3,
+        2 * cellSize / 3, cellSize / 6,
+        5 * cellSize / 6, cellSize / 2,
+        2 * cellSize / 3, 5 * cellSize / 6,
+        2 * cellSize / 3, 2 * cellSize / 3,
+        cellSize / 6, 2 * cellSize / 3
+    ) {
+        fill = Color.LIGHTGRAY
+    }
+}
+
 fun StackPane.showSquare(square: Square? = null) {
     (children[0] as Shape).apply {
         fill = square?.terrain?.toGraphicColor() ?: Color.LIGHTGRAY
@@ -42,6 +56,10 @@ fun StackPane.showSquare(square: Square? = null) {
             ""
         }
     }
+}
+
+fun StackPane.showArrow(color: PlayerColor?) {
+    showKing(color)
 }
 
 fun StackPane.showKing(color: PlayerColor?) {

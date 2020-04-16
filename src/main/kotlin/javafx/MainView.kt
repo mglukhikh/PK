@@ -240,6 +240,7 @@ class MainView : View("Лоскутное королевство") {
                 if (changeCurrentDomino) {
                     currentDominoIndex = (currentDominoIndex + 1) % choiceDepth
                 }
+                choicePanes.showNextDomino()
                 clearOrientationPane()
             }
             is GameState.End -> {
@@ -326,7 +327,19 @@ class MainView : View("Лоскутное королевство") {
         thickSeparator()
         button("Пропустить ход!").setOnAction {
             if (!game.nextTurn(GameMove.None)) {
-                alert(Alert.AlertType.WARNING, "Сейчас пропустить ход нельзя!")
+                if (game.state is GameState.MapNextDomino) {
+                    alert(
+                        Alert.AlertType.WARNING,
+                        header = "Сейчас пропустить ход нельзя",
+                        content = "Выберите следующий лоскут напротив стрелок"
+                    )
+                } else if (game.state is GameState.End) {
+                    alert(
+                        Alert.AlertType.WARNING,
+                        header = "Сейчас пропустить ход нельзя",
+                        content = "Игра уже окончена"
+                    )
+                }
             } else {
                 handleNextGameState()
             }
