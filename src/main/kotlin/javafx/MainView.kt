@@ -151,7 +151,7 @@ class MainView : View("Лоскутное королевство") {
                             cells[point] = this
                             emptyRectangle()
                             if (x == 0 && y == 0) {
-                                kingCircle()
+                                kingCrown()
                                 showKing(color)
                             } else {
                                 text()
@@ -265,7 +265,7 @@ class MainView : View("Лоскутное королевство") {
         stackpane {
             turnPane = this
             emptyRectangle()
-            kingCircle()
+            kingCrown()
             showKing(game.colorToMove)
         }
         thickSeparator()
@@ -312,7 +312,7 @@ class MainView : View("Лоскутное королевство") {
             vbox {
                 stackpane {
                     emptyRectangle()
-                    kingCircle()
+                    kingCrown()
                     showKing(color)
                 }
                 stackpane {

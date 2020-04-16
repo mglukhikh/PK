@@ -17,7 +17,7 @@ import tornadofx.separator
 
 private const val cellSize = 40.0
 
-fun StackPane.kingCircle(): Shape {
+fun StackPane.kingCrown(): Shape {
     return polygon(
         cellSize / 4, 7 * cellSize / 8,
         cellSize / 8, cellSize / 8,

@@ -42,7 +42,7 @@ class ChoicePanes(private val game: Game, private val handleNextState: (Boolean)
         hbox {
             val choice = stackpane {
                 emptyRectangle()
-                kingCircle()
+                kingCrown()
                 if (handleClicks) {
                     setOnMousePressed {
                         choiceMade(index)
