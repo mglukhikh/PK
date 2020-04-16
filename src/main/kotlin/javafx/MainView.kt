@@ -6,8 +6,6 @@ import game.GameMove
 import game.GameState
 import javafx.scene.control.Alert
 import javafx.scene.layout.*
-import javafx.scene.shape.Circle
-import javafx.scene.shape.Shape
 import javafx.scene.text.Text
 import tornadofx.*
 
