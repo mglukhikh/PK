@@ -26,10 +26,6 @@ class MainView : View("Лоскутное королевство") {
 
     private val kingdomPanes = mutableMapOf<PlayerColor, KingdomPane>()
 
-    private val currentChoicePanes = mutableListOf<ChoicePane>()
-
-    private val nextChoicePanes = mutableListOf<ChoicePane>()
-
     private lateinit var turnPane: StackPane
 
     private val orientationPanes = mutableListOf<StackPane>()
@@ -52,6 +48,8 @@ class MainView : View("Лоскутное королевство") {
 
     override val root = BorderPane()
 
+    private val choicePanes = ChoicePanes(game) { handleNextGameState(it) }
+
     init {
         with(root) {
             // Зона полей
@@ -65,7 +63,9 @@ class MainView : View("Лоскутное королевство") {
             // Зона выбора
             right {
                 vbox {
-                    choicePanes()
+                    with(choicePanes) {
+                        create()
+                    }
                 }
             }
             // Зона статуса
@@ -77,7 +77,7 @@ class MainView : View("Лоскутное королевство") {
                     }
                 }
             }
-            showNextDomino()
+            choicePanes.showNextDomino()
         }
     }
 
@@ -220,22 +220,26 @@ class MainView : View("Лоскутное королевство") {
         currentSecondDominoPane = null
         firstDominoPane.showSquare(currentDominoToPlace.first)
         secondDominoPane.showSquare(currentDominoToPlace.second)
-        showCurrentTurn()
         showScore(color)
         handleNextGameState()
     }
 
-    private fun handleNextGameState() {
+    private fun handleNextGameState(changeCurrentDomino: Boolean = true) {
+        showCurrentTurn()
         when (game.state) {
             is GameState.PlaceCurrentDomino -> {
-                currentDominoIndex = (currentDominoIndex + 1) % choiceDepth
-                showCurrentDomino()
-                showNextDomino()
+                if (changeCurrentDomino) {
+                    currentDominoIndex = (currentDominoIndex + 1) % choiceDepth
+                }
+                choicePanes.showCurrentDomino()
+                choicePanes.showNextDomino()
                 currentDominoToPlace = game.currentDomino[currentDominoIndex]
                 showOrientationPane()
             }
             is GameState.MapNextDomino -> {
-                currentDominoIndex = (currentDominoIndex + 1) % choiceDepth
+                if (changeCurrentDomino) {
+                    currentDominoIndex = (currentDominoIndex + 1) % choiceDepth
+                }
                 clearOrientationPane()
             }
             is GameState.End -> {
@@ -253,95 +257,6 @@ class MainView : View("Лоскутное королевство") {
             "Очков набрано: ${game.scores().entries.joinToString { (color, score) ->
                 "${color.str}: $score"
             }}")
-    }
-
-    // =======================================================================
-
-    private class ChoicePane(val choice: StackPane, val left: StackPane, val right: StackPane)
-
-    private fun VBox.choicePanes() {
-        for (i in 0 until choiceDepth) {
-            choicePane(i).apply {
-                currentChoicePanes += this
-            }
-            separator()
-        }
-        thickSeparator()
-        for (i in 0 until choiceDepth) {
-            choicePane(i, handleClicks = true).apply {
-                nextChoicePanes += this
-            }
-            separator()
-        }
-    }
-
-    private fun VBox.choicePane(index: Int, handleClicks: Boolean = false): ChoicePane {
-        lateinit var result: ChoicePane
-        hbox {
-            val choice = stackpane {
-                emptyRectangle()
-                kingCircle()
-                if (handleClicks) {
-                    setOnMousePressed {
-                        choiceMade(index)
-                    }
-                }
-            }
-            val left = stackpane {
-                emptyRectangle()
-                text()
-            }
-            val right = stackpane {
-                emptyRectangle()
-                text()
-            }
-            thickSeparator()
-            result = ChoicePane(choice, left, right)
-        }
-        return result
-    }
-
-    private fun choiceMade(nextIndex: Int) {
-        val state = game.state
-        if (state !is GameState.MapNextDomino) {
-            return
-        }
-        if (!game.nextTurn(GameMove.MapNextDomino(nextIndex))) {
-            return
-        }
-        nextChoicePanes[nextIndex].choice.showKing(state.color)
-        showCurrentTurn()
-        if (game.state is GameState.PlaceCurrentDomino) {
-            showCurrentDomino()
-            showNextDomino()
-            currentDominoToPlace = game.currentDomino[currentDominoIndex]
-            showOrientationPane()
-        }
-    }
-
-    private fun showCurrentDomino() {
-        showDominoForChoice(game.currentDomino, game.currentDominoMapping, currentChoicePanes)
-    }
-
-    private fun showNextDomino() {
-        showDominoForChoice(game.nextDomino, game.nextDominoMapping, nextChoicePanes)
-    }
-
-    private fun showDominoForChoice(dominoList: List<Domino>, mapping: Map<Int, PlayerColor>, panes: List<ChoicePane>) {
-        if (dominoList.isEmpty()) {
-            for (index in 0 until choiceDepth) {
-                panes[index].choice.showKing(null)
-                panes[index].left.showSquare(Square(Terrain.CENTER))
-                panes[index].right.showSquare(Square(Terrain.CENTER))
-            }
-            return
-        }
-        dominoList.forEachIndexed { index, domino ->
-            val kingColor = mapping[index]
-            panes[index].choice.showKing(kingColor)
-            panes[index].left.showSquare(domino.first)
-            panes[index].right.showSquare(domino.second)
-        }
     }
 
     // =======================================================================
@@ -413,7 +328,6 @@ class MainView : View("Лоскутное королевство") {
             if (!game.nextTurn(GameMove.None)) {
                 alert(Alert.AlertType.WARNING, "Сейчас пропустить ход нельзя!")
             } else {
-                showCurrentTurn()
                 handleNextGameState()
             }
         }
