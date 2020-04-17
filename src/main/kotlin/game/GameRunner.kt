@@ -6,7 +6,7 @@ import player.AbstractPlayer
 class GameRunner(size: Int, private val playerNumber: Int) {
     private val colors = PlayerColor.values().take(playerNumber).shuffled(kotlin.random.Random)
 
-    private val game = Game(size, colors, turns = 12)
+    val game = Game(size, colors, turns = 12)
 
     val players = mutableMapOf<PlayerColor, AbstractPlayer>()
 
@@ -18,7 +18,7 @@ class GameRunner(size: Int, private val playerNumber: Int) {
         players[color] = player
     }
 
-    fun play(): Map<PlayerColor, Int> {
+    fun play(moveInterval: Int = 0): Map<PlayerColor, Int> {
         assert(players.size == playerNumber)
         while (game.state != GameState.End) {
             val move = when (val state = game.state) {
@@ -27,6 +27,9 @@ class GameRunner(size: Int, private val playerNumber: Int) {
                 is GameState.PlaceCurrentDomino -> players[state.color]!!.nextMove()
             }
             game.nextTurn(move)
+            if (moveInterval > 0) {
+                Thread.sleep(moveInterval.toLong())
+            }
         }
         return game.scores()
     }
