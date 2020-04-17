@@ -3,12 +3,12 @@ package game
 import core.PlayerColor
 import player.AbstractPlayer
 
-class GameRunner(val size: Int, val playerNumber: Int) {
-    val colors = PlayerColor.values().take(playerNumber).shuffled(kotlin.random.Random)
+class GameRunner(size: Int, private val playerNumber: Int) {
+    private val colors = PlayerColor.values().take(playerNumber).shuffled(kotlin.random.Random)
 
-    val game = Game(size, colors, turns = 12)
+    private val game = Game(size, colors, turns = 12)
 
-    val players = mutableMapOf<PlayerColor, AbstractPlayer>()
+    private val players = mutableMapOf<PlayerColor, AbstractPlayer>()
 
     fun addPlayer(player: AbstractPlayer) {
         val color = colors.first { it !in players }
