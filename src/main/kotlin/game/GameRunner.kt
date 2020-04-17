@@ -8,7 +8,7 @@ class GameRunner(size: Int, private val playerNumber: Int) {
 
     private val game = Game(size, colors, turns = 12)
 
-    private val players = mutableMapOf<PlayerColor, AbstractPlayer>()
+    val players = mutableMapOf<PlayerColor, AbstractPlayer>()
 
     fun addPlayer(player: AbstractPlayer) {
         val color = colors.first { it !in players }

@@ -25,6 +25,11 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
     var currentDominoMapping = mutableMapOf<Int, PlayerColor>()
         private set
 
+    val currentDominoToPlace: Domino
+        get() = currentDomino[currentDominoMapping.entries.find {
+            it.value == state.color
+        }!!.key]
+
     private val kingdoms = players.associateWith { Kingdom(size) }
 
     fun mapNextDomino(player: PlayerColor, index: Int): Boolean {
@@ -32,6 +37,13 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
             throw AssertionError("Incorrect domino index: $index")
         }
         return nextDominoMapping.put(index, player) == null
+    }
+
+    fun takeCurrentDomino(color: PlayerColor): Pair<PlayerColor, Domino>? {
+        val index = currentDominoMapping.entries.find {
+            it.value == color
+        }!!.key
+        return takeCurrentDomino(index)
     }
 
     fun takeCurrentDomino(index: Int): Pair<PlayerColor, Domino>? {
@@ -109,15 +121,13 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
                 if (move is GameMove.MapNextDomino) {
                     return false
                 }
-                val index = currentDominoMapping.entries.find {
-                    it.value == state.color
-                }!!.key
+                val currentDominoToPlace = currentDominoToPlace
                 if (move is GameMove.PlaceCurrentDomino) {
-                    if (!addDomino(state.color, move.point, DirectedDomino(currentDomino[index], move.direction))) {
+                    if (!addDomino(state.color, move.point, DirectedDomino(currentDominoToPlace, move.direction))) {
                         return false
                     }
                 }
-                takeCurrentDomino(index)
+                takeCurrentDomino(state.color)
                 if (turn < turns) {
                     this.state = GameState.MapNextDomino(turn, state.color)
                 } else {
