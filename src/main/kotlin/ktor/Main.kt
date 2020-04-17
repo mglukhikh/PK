@@ -36,9 +36,9 @@ fun main() {
                             val kingdom = game.kingdom(color)
                             p {
                                 table {
-                                    for (row in -5..5) {
+                                    for (row in kingdom.minY..kingdom.maxY) {
                                         tr {
-                                            for (column in -5..5) {
+                                            for (column in kingdom.minX..kingdom.maxX) {
                                                 td {
                                                     val square = kingdom.getSquare(Point(column, row))
                                                     if (square == null) {
