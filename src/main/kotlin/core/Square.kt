@@ -9,5 +9,9 @@ data class Square(val terrain: Terrain, val crowns: Int = 0) {
 
     fun sameWith(other: Square?): Boolean =
         terrain.sameWith(other?.terrain)
+
+    override fun toString(): String {
+        return terrain.name.toLowerCase() + if (crowns == 0) "" else crowns.toString()
+    }
 }
 

@@ -9,7 +9,7 @@ import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.html.*
-import player.BrainDeadPlayer
+import player.SimpleThinkingPlayer
 import kotlin.concurrent.thread
 
 private val runner = GameRunner(5, 3)
@@ -44,7 +44,7 @@ fun main() {
                                                     if (square == null) {
                                                         +"--------"
                                                     } else {
-                                                        +square.terrain.name.toLowerCase()
+                                                        +square.toString()
                                                     }
                                                 }
                                             }
@@ -62,8 +62,8 @@ fun main() {
 
 private fun playGame() {
     for (i in 1..3) {
-        runner.addPlayer(BrainDeadPlayer())
+        runner.addPlayer(SimpleThinkingPlayer())
     }
     Thread.sleep(10000)
-    runner.play(5000)
+    runner.play(1000)
 }
