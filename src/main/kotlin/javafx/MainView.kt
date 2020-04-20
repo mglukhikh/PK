@@ -7,7 +7,9 @@ import game.GameState
 import javafx.scene.control.Alert
 import javafx.scene.layout.*
 import javafx.scene.text.Text
+import player.SimpleThinkingPlayer
 import tornadofx.*
+import kotlin.concurrent.timer
 
 class MainView : View("Лоскутное королевство") {
     private val colorChoices = (app as MainApp).colorChoices
@@ -22,6 +24,14 @@ class MainView : View("Лоскутное королевство") {
         nextTurn(GameMove.None)
     }
 
+    private val aiPlayers = colorChoices.entries.filter { it.value == PlayerChoice.AI }.associate { (color, _) ->
+        color to SimpleThinkingPlayer().apply {
+            this.color = color
+            this.game = this@MainView.game
+            kingdom = game.kingdom(color)
+        }
+    }
+
     private val choiceDepth = game.choiceDepth
 
     private val kingdomPanes = mutableMapOf<PlayerColor, KingdomPane>()
@@ -34,7 +44,7 @@ class MainView : View("Лоскутное королевство") {
 
     private var currentDominoIndex = 0
 
-    private lateinit var currentDominoToPlace: Domino
+    private var currentDominoToPlace: Domino? = null
 
     private lateinit var currentPointToPlace: Point
 
@@ -79,6 +89,10 @@ class MainView : View("Лоскутное королевство") {
             }
             choicePanes.showNextDomino()
         }
+        subscribe<AutoTurnEvent> {
+            makeComputerTurn()
+        }
+        startTimerIfNeeded()
     }
 
     private fun BorderPane.kingdomsForTwo() {
@@ -177,6 +191,7 @@ class MainView : View("Лоскутное королевство") {
     }
 
     private fun showDominoToPlaceIfApplicable(color: PlayerColor) {
+        val currentDominoToPlace = currentDominoToPlace ?: return
         val state = game.state
         if (color != game.colorToMove || state !is GameState.PlaceCurrentDomino) {
             return
@@ -198,6 +213,7 @@ class MainView : View("Лоскутное королевство") {
     }
 
     private fun placeDomino(color: PlayerColor) {
+        val currentDominoToPlace = currentDominoToPlace ?: return
         val state = game.state
         if (color != game.colorToMove || state !is GameState.PlaceCurrentDomino) {
             return
@@ -224,12 +240,25 @@ class MainView : View("Лоскутное королевство") {
         handleNextGameState()
     }
 
+    private fun showKingdom(color: PlayerColor) {
+        val limit = kingdomSize - 1
+        val pane = kingdomPanes.getValue(color)
+        for (y in -limit..limit) {
+            for (x in -limit..limit) {
+                if (x == 0 && y == 0) continue
+                val point = Point(x, y)
+                val square = kingdom(color).getSquare(point)
+                pane.cells.getValue(point).showSquare(square)
+            }
+        }
+    }
+
     private fun handleNextGameState(changeCurrentDomino: Boolean = true) {
         showCurrentTurn()
         when (game.state) {
             is GameState.PlaceCurrentDomino -> {
                 if (changeCurrentDomino) {
-                    currentDominoIndex = (currentDominoIndex + 1) % choiceDepth
+                    currentDominoIndex = game.currentDominoIndex
                 }
                 choicePanes.showCurrentDomino()
                 choicePanes.showNextDomino()
@@ -359,6 +388,7 @@ class MainView : View("Лоскутное королевство") {
     }
 
     private fun showOrientationPane() {
+        val currentDominoToPlace = currentDominoToPlace ?: return
         currentFirstDominoPane?.showSquare()
         currentSecondDominoPane?.showSquare()
         currentFirstDominoPane = null
@@ -390,6 +420,42 @@ class MainView : View("Лоскутное королевство") {
         }
         currentDirection = direction
         showOrientationPane()
+    }
+
+    // =======================================================================
+
+    private var pauseCounter = 0
+
+    private class AutoTurnEvent : FXEvent()
+
+    private fun makeComputerTurn() {
+        val color = game.colorToMove
+        val aiPlayer = aiPlayers[color]
+        if (color != null && aiPlayer != null) {
+            pauseCounter++
+            if (pauseCounter == 10) {
+                pauseCounter = 0
+                val move = aiPlayer.nextMove()
+                game.nextTurn(move)
+                showKingdom(color)
+                showScore(color)
+                handleNextGameState()
+            }
+        } else {
+            pauseCounter = 0
+        }
+    }
+
+    private fun startTimerIfNeeded() {
+        if (aiPlayers.isNotEmpty()) {
+            timer(daemon = true, period = 100) {
+                if (game.state !is GameState.End) {
+                    fire(AutoTurnEvent())
+                } else {
+                    this.cancel()
+                }
+            }
+        }
     }
 
     // =======================================================================

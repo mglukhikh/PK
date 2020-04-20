@@ -26,9 +26,12 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
         private set
 
     val currentDominoToPlace: Domino
-        get() = currentDomino[currentDominoMapping.entries.find {
+        get() = currentDomino[currentDominoIndex]
+
+    val currentDominoIndex: Int
+        get() = currentDominoMapping.entries.find {
             it.value == state.color
-        }!!.key]
+        }!!.key
 
     private val kingdoms = players.associateWith { Kingdom(size) }
 

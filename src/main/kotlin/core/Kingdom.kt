@@ -19,6 +19,8 @@ class Kingdom(private val size: Int) {
 
     private val overflown: Boolean get() = dimension > size
 
+    fun getSquare(point: Point): Square? = squares[point]
+
     fun isDominoApplicable(point: Point, domino: DirectedDomino): Boolean {
         if (point in squares) return false
         val secondPoint = point + domino.direction
