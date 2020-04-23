@@ -27,6 +27,9 @@ fun main() {
                 call.respondHtml {
                     head {
                         title("Hello from Ktor!")
+                        unsafe {
+                            +"<meta http-equiv=\"refresh\" content=\"2\">"
+                        }
                     }
                     body {
                         p {
@@ -64,6 +67,6 @@ private fun playGame() {
     for (i in 1..3) {
         runner.addPlayer(SimpleThinkingPlayer())
     }
-    Thread.sleep(10000)
+    Thread.sleep(5000)
     runner.play(1000)
 }
