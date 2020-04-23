@@ -1,6 +1,7 @@
 package ktor
 
 import core.Point
+import core.Terrain
 import game.Game
 import game.GameRunner
 import game.GameState
@@ -28,6 +29,15 @@ fun main() {
                 call.respondHtml {
                     head {
                         title("Hello from Ktor!")
+                        style {
+                            unsafe {
+                                +"""
+                                    td {
+                                        font-size: 18pt
+                                    }
+                                """.trimIndent()
+                            }
+                        }
                         unsafe {
                             +"<meta http-equiv=\"refresh\" content=\"2\">"
                         }
@@ -43,12 +53,25 @@ fun main() {
                                     for (row in kingdom.minY..kingdom.maxY) {
                                         tr {
                                             for (column in kingdom.minX..kingdom.maxX) {
-                                                td {
-                                                    val square = kingdom.getSquare(Point(column, row))
-                                                    if (square == null) {
-                                                        +"--------"
-                                                    } else {
-                                                        +square.toString()
+                                                val square = kingdom.getSquare(Point(column, row))
+                                                if (square == null) {
+                                                    td { +"-" }
+                                                } else {
+                                                    val background = when (square.terrain) {
+                                                        Terrain.CENTER -> "000000"
+                                                        Terrain.PLAIN -> "ffff00"
+                                                        Terrain.FOREST -> "008000"
+                                                        Terrain.WATER -> "0000ff"
+                                                        Terrain.GRASS -> "00ff00"
+                                                        Terrain.SWAMP -> "808000"
+                                                        Terrain.MINE -> "808080"
+                                                    }
+                                                    unsafe {
+                                                        +"""
+                                                            <td bgcolor="#$background">
+                                                                ${square.crowns} 
+                                                            </td>
+                                                        """.trimIndent()
                                                     }
                                                 }
                                             }
