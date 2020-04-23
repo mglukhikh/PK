@@ -3,6 +3,7 @@ package ktor
 import core.Point
 import game.Game
 import game.GameRunner
+import game.GameState
 import io.ktor.application.*
 import io.ktor.html.*
 import io.ktor.routing.*
@@ -54,6 +55,16 @@ fun main() {
                                         }
                                     }
                                 }
+                            }
+                            p {
+                                +"Score: ${game.score(color)}"
+                            }
+                        }
+                        p {
+                            if (game.state !is GameState.End) {
+                                +"Game in process!"
+                            } else {
+                                +"Game over!"
                             }
                         }
                     }
