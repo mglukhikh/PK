@@ -18,15 +18,22 @@ class GameRunner(size: Int, private val playerNumber: Int) {
         players[color] = player
     }
 
-    fun play(moveInterval: Int = 0): Map<PlayerColor, Int> {
+    fun makeOneTurn() {
         assert(players.size == playerNumber)
-        while (game.state != GameState.End) {
+        if (game.state != GameState.End) {
             val move = when (val state = game.state) {
                 is GameState.Start, is GameState.End -> GameMove.None
                 is GameState.MapNextDomino -> players[state.color]!!.nextMove()
                 is GameState.PlaceCurrentDomino -> players[state.color]!!.nextMove()
             }
             game.nextTurn(move)
+        }
+    }
+
+    fun play(moveInterval: Int = 0): Map<PlayerColor, Int> {
+        assert(players.size == playerNumber)
+        while (game.state != GameState.End) {
+            makeOneTurn()
             if (moveInterval > 0) {
                 Thread.sleep(moveInterval.toLong())
             }
