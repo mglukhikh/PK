@@ -33,7 +33,7 @@ fun main() {
                             unsafe {
                                 +"""
                                     td {
-                                        font-size: 18pt
+                                        font-size: 24pt
                                     }
                                 """.trimIndent()
                             }
@@ -60,17 +60,15 @@ fun main() {
                                                     val background = when (square.terrain) {
                                                         Terrain.CENTER -> "000000"
                                                         Terrain.PLAIN -> "ffff00"
-                                                        Terrain.FOREST -> "008000"
-                                                        Terrain.WATER -> "0000ff"
+                                                        Terrain.FOREST -> "80c000"
+                                                        Terrain.WATER -> "00ffff"
                                                         Terrain.GRASS -> "00ff00"
-                                                        Terrain.SWAMP -> "808000"
+                                                        Terrain.SWAMP -> "ff00ff"
                                                         Terrain.MINE -> "808080"
                                                     }
                                                     unsafe {
                                                         +"""
-                                                            <td bgcolor="#$background">
-                                                                ${square.crowns} 
-                                                            </td>
+                                                            <td bgcolor="#$background"> ${square.crowns} </td>
                                                         """.trimIndent()
                                                     }
                                                 }
