@@ -1,7 +1,7 @@
 package ktor
 
-import core.Point
-import core.Terrain
+import core.*
+import core.PlayerColor.*
 import game.Game
 import game.GameRunner
 import game.GameState
@@ -20,6 +20,55 @@ private val runner = GameRunner(5, 3)
 private val game: Game
     get() = runner.game
 
+private fun PlayerColor.shortName(): String =
+    when (this) {
+        YELLOW -> "Alan"
+        RED -> "John"
+        GREEN -> "Mike"
+        BLUE -> "Kate"
+    }
+
+private fun TR.showSquare(square: Square?) {
+    if (square == null) {
+        td { +"-" }
+    } else {
+        val background = when (square.terrain) {
+            Terrain.CENTER -> "000000"
+            Terrain.PLAIN -> "ffff00"
+            Terrain.FOREST -> "80c000"
+            Terrain.WATER -> "00ffff"
+            Terrain.GRASS -> "00ff00"
+            Terrain.SWAMP -> "ff00ff"
+            Terrain.MINE -> "808080"
+        }
+        unsafe {
+            +"""
+                <td bgcolor="#$background"> ${square.crowns} </td>
+            """.trimIndent()
+        }
+    }
+}
+
+
+private fun P.showDomino(dominoList: List<Domino>, mapping: Map<Int, PlayerColor>, name: String) {
+    if (dominoList.isEmpty()) {
+        return
+    }
+    +name
+    table {
+        dominoList.forEachIndexed { index, domino ->
+            tr {
+                val kingColor = mapping[index]
+                td {
+                    +(kingColor?.shortName() ?: "------")
+                }
+                showSquare(domino.first)
+                showSquare(domino.second)
+            }
+        }
+    }
+}
+
 private fun HTML.generate() {
     head {
         title("Hello from Ktor!")
@@ -37,42 +86,54 @@ private fun HTML.generate() {
         }
     }
     body {
-        p {
+        h1 {
             +"Kingdomino!"
         }
-        for (color in game.players) {
-            val kingdom = game.kingdom(color)
-            p {
-                table {
-                    for (row in kingdom.minY..kingdom.maxY) {
-                        tr {
-                            for (column in kingdom.minX..kingdom.maxX) {
-                                val square = kingdom.getSquare(Point(column, row))
-                                if (square == null) {
-                                    td { +"-" }
-                                } else {
-                                    val background = when (square.terrain) {
-                                        Terrain.CENTER -> "000000"
-                                        Terrain.PLAIN -> "ffff00"
-                                        Terrain.FOREST -> "80c000"
-                                        Terrain.WATER -> "00ffff"
-                                        Terrain.GRASS -> "00ff00"
-                                        Terrain.SWAMP -> "ff00ff"
-                                        Terrain.MINE -> "808080"
+        table {
+            tr {
+                for (color in game.players) {
+                    td {
+                        val kingdom = game.kingdom(color)
+                        p {
+                            +"Player: ${color.shortName()} ||"
+                        }
+                        p {
+                            table {
+                                for (row in kingdom.minY..kingdom.maxY) {
+                                    tr {
+                                        for (column in kingdom.minX..kingdom.maxX) {
+                                            showSquare(kingdom.getSquare(Point(column, row)))
+                                        }
                                     }
-                                    unsafe {
-                                        +"""
-                                            <td bgcolor="#$background"> ${square.crowns} </td>
-                                         """.trimIndent()
+                                }
+                                for (row in kingdom.maxY + 1..kingdom.minY + 4) {
+                                    tr {
+                                        for (column in kingdom.minX..kingdom.maxX) {
+                                            td { +"-" }
+                                        }
                                     }
                                 }
                             }
                         }
+                        p {
+                            +"${game.score(color)}"
+                        }
                     }
                 }
             }
-            p {
-                +"Score: ${game.score(color)}"
+        }
+        table {
+            tr {
+                td {
+                    p {
+                        showDomino(game.currentDomino, game.currentDominoMapping, name = "current")
+                    }
+                }
+                td {
+                    p {
+                        showDomino(game.nextDomino, game.nextDominoMapping, name = "next")
+                    }
+                }
             }
         }
         p {
@@ -144,7 +205,7 @@ private fun playGame(isStart: Boolean) {
             playThread = thread {
                 while (game.state != GameState.End) {
                     runner.makeOneTurn()
-                    Thread.sleep(1000)
+                    Thread.sleep(2000)
                 }
             }
         } else {
