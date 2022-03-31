@@ -107,7 +107,7 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
                         this.state = GameState.PlaceCurrentDomino(1, currentDominoMapping.getValue(0))
                     }
                 } else {
-                    val nextColor = currentDominoMapping.entries.minBy { (index, _) -> index }?.value
+                    val nextColor = currentDominoMapping.entries.minByOrNull { (index, _) -> index }?.value
                     if (nextColor != null) {
                         this.state = GameState.PlaceCurrentDomino(turn, nextColor)
                     } else {
@@ -138,7 +138,7 @@ class Game(val size: Int, val players: List<PlayerColor>, val turns: Int = (size
                         this.state = GameState.End
                     } else {
                         this.state = GameState.PlaceCurrentDomino(
-                            turn, currentDominoMapping.entries.minBy { (index, _) ->
+                            turn, currentDominoMapping.entries.minByOrNull { (index, _) ->
                                 index
                             }!!.value
                         )

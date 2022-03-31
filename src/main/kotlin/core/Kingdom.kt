@@ -7,13 +7,13 @@ class Kingdom(private val size: Int) {
 
     private val dominos = mutableListOf<Pair<Point, DirectedDomino>>()
 
-    val minX: Int get() = squares.keys.minBy { it.x }!!.x
+    val minX: Int get() = squares.keys.minByOrNull { it.x }!!.x
 
-    val minY: Int get() = squares.keys.minBy { it.y }!!.y
+    val minY: Int get() = squares.keys.minByOrNull { it.y }!!.y
 
-    val maxX: Int get() = squares.keys.maxBy { it.x }!!.x
+    val maxX: Int get() = squares.keys.maxByOrNull { it.x }!!.x
 
-    val maxY: Int get() = squares.keys.maxBy { it.y }!!.y
+    val maxY: Int get() = squares.keys.maxByOrNull { it.y }!!.y
 
     private val dimension: Int get() = maxOf(maxX - minX, maxY - minY) + 1
 

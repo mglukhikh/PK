@@ -35,7 +35,7 @@ class SimpleThinkingPlayer : AbstractPlayer() {
         assert(game.state.color == color)
         return when (game.state) {
             is GameState.MapNextDomino -> {
-                val chosen = game.nextDomino.withIndex().maxBy { (index, domino) ->
+                val chosen = game.nextDomino.withIndex().maxByOrNull { (index, domino) ->
                     if (index in game.nextDominoMapping) -1
                     else bestMoveAndScore(domino).first
                 }?.index ?: throw AssertionError("No domino to choose")
